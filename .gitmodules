@@ -1,0 +1,3 @@
+[submodule "OpenXLSX"]
+	path = OpenXLSX
+	url = https://github.com/akira215/OpenXLSX.git
