@@ -26,7 +26,7 @@ int main() {
 
     std::string n = testrg.name();
 
-    doc.workbook().addNamedRange("NewFromCpp","Input!$F$4",2);
+    doc.workbook().addNamedRange("NewFromCpp","Input!$F$4f",2);
 
     //doc.workbook().definedName("nbAngles");
 
