@@ -10,10 +10,10 @@ int main() {
 
 
     auto rng = wks.range(XLCellReference("A1"), XLCellReference("C20"));
-    XLDefinedName testrg = doc.workbook().definedName("defined_in_sheet");
+    XLNamedRange testrg = doc.workbook().namedRange("defined_in_sheet");
     //doc.workbook().definedName("defined_in_shee");
 
-    testrg = doc.workbook().definedName("testRange");
+    testrg = doc.workbook().namedRange("testRange");
     XLCellValue iteration;
     for (auto& cell : testrg) 
         iteration = cell.value();
@@ -23,7 +23,11 @@ int main() {
     //XLCellValue i = testrg.firstValue();
     XLCellValue itet = i.value();
     i.value() = "Changed By ASH";
+
     std::string n = testrg.name();
+
+    doc.workbook().addNamedRange("NewFromCpp","Input!$F$4",2);
+
     //doc.workbook().definedName("nbAngles");
 
     //wks.cell("A1").value() = "Hello, OpenXLSX ASHHHH!";
