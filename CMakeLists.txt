@@ -10,8 +10,9 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/output)
 
 add_subdirectory(OpenXLSX)
 
+file(GLOB CPP_SRC CONFIGURE_DEPENDS "src/*.cpp")
 
-add_executable(${PROJECT_NAME} main.cpp)
+add_executable(${PROJECT_NAME} ${CPP_SRC})
 target_link_libraries(${PROJECT_NAME} OpenXLSX::OpenXLSX)
 
 set(CPACK_PROJECT_NAME ${PROJECT_NAME})
