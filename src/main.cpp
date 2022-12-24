@@ -18,6 +18,7 @@ int main() {
     for (auto& cell : testrg) 
         iteration = cell.value();
 
+    doc.workbook().deleteNamedRange("NewFromCpp");
 
     XLCell i = testrg.firstCell();
     //XLCellValue i = testrg.firstValue();
