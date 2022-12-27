@@ -14,6 +14,11 @@ int main() {
 
     //testTable.setName("tbl_ash");
     auto testName = testTable.name();
+    auto cols = testTable.columnNames();
+
+    auto ncol = testTable.columnIndex("Col bord");
+    auto sht = testTable.getSheet();
+    std::string shtName = sht.name();
 
     //doc.workbook().definedName("nbAngles");
 
