@@ -5,29 +5,15 @@ using namespace OpenXLSX;
 int main() {
 
     XLDocument doc;
-    doc.open("./CTest.xlsx");
+    doc.open("./testSimple.xlsx");
     auto wks = doc.workbook().worksheet("Input");
 
 
-    auto rng = wks.range(XLCellReference("A1"), XLCellReference("C20"));
-    XLNamedRange testrg = doc.workbook().namedRange("defined_in_sheet");
-    //doc.workbook().definedName("defined_in_shee");
+    auto testTable = doc.workbook().table("tbl_one");
 
-    testrg = doc.workbook().namedRange("testRange");
-    XLCellValue iteration;
-    for (auto& cell : testrg) 
-        iteration = cell.value();
 
-    doc.workbook().deleteNamedRange("NewFromCpp");
-
-    XLCell i = testrg.firstCell();
-    //XLCellValue i = testrg.firstValue();
-    XLCellValue itet = i.value();
-    i.value() = "Changed By ASH";
-
-    std::string n = testrg.name();
-
-    doc.workbook().addNamedRange("NewFromCpp","Input!$F$4f",2);
+    //testTable.setName("tbl_ash");
+    auto testName = testTable.name();
 
     //doc.workbook().definedName("nbAngles");
 
