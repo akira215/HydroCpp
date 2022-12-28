@@ -6,7 +6,10 @@ int main() {
 
     XLDocument doc;
     doc.open("./testSimple.xlsx");
-    auto wks = doc.workbook().worksheet("Input");
+    auto wks = doc.workbook().worksheet("Matrix");
+
+    auto matrix = wks.range("C4:G16");
+    int myCell = matrix[57].value();
 
 
     auto testTable = doc.workbook().table("tbl_one");
@@ -17,7 +20,21 @@ int main() {
     auto cols = testTable.columnNames();
 
     auto ncol = testTable.columnIndex("Col bord");
-    auto sht = testTable.getSheet();
+    auto sht = testTable.getWorksheet();
+    auto rang = testTable.dataBodyRange();
+    auto rows = testTable.tableRows();
+
+    for(auto& row:rows) {
+        int i=row[0].value();
+    }
+
+     for(auto& cell:rows[9]) {
+        int i=cell.value();
+    }
+
+    auto row5 = rows[5];
+
+
     std::string shtName = sht.name();
 
     //doc.workbook().definedName("nbAngles");
