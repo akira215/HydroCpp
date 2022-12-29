@@ -5,8 +5,11 @@ using namespace OpenXLSX;
 int main() {
 
     XLDocument doc;
-    doc.open("./testSimple.xlsx");
+    doc.open("./tablecrea.xlsx");
     auto wks = doc.workbook().worksheet("Matrix");
+
+
+    doc.workbook().addTable("Matrix","Tableau2","B1:C20");
 
     auto matrix = wks.range("C4:G16");
     int myCell = matrix[57].value();
@@ -15,31 +18,6 @@ int main() {
     auto testTable = doc.workbook().table("tbl_one");
 
 
-    //testTable.setName("tbl_ash");
-    auto testName = testTable.name();
-    auto cols = testTable.columnNames();
-
-    auto ncol = testTable.columnIndex("Col bord");
-    auto sht = testTable.getWorksheet();
-    auto rang = testTable.dataBodyRange();
-    auto rows = testTable.tableRows();
-
-    for(auto& row:rows) {
-        int i=row[0].value();
-    }
-
-     for(auto& cell:rows[9]) {
-        int i=cell.value();
-    }
-
-    auto row5 = rows[5];
-
-
-    std::string shtName = sht.name();
-
-    //doc.workbook().definedName("nbAngles");
-
-    //wks.cell("A1").value() = "Hello, OpenXLSX ASHHHH!";
 
     doc.save();
     doc.close();
