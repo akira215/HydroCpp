@@ -9,7 +9,7 @@ int main() {
     //auto wks = doc.workbook().worksheet("Matrix");
 
 
-    doc.workbook().addTable("Matrix","Tableau2","J10:L16");
+    doc.workbook().addTable("Feuil1","Tableau2","J10:L16");
     //doc.workbook().addWorksheet("testCpp");
 
 
