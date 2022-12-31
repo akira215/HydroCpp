@@ -6,7 +6,8 @@ int main() {
 
     XLDocument doc;
     doc.open("./Testcrea.xlsx");
-    //auto wks = doc.workbook().worksheet("Matrix");
+    auto wks = doc.workbook().worksheet("Feuil1");
+    doc.workbook().addNamedRange("test","Feuil1!A1:C10");
 
 
     doc.workbook().addTable("Feuil1","Tableau2","J10:L16");
