@@ -74,9 +74,13 @@ int main() {
     }
 
 
-    //tbl.autofilter().hideArrows();
+    tbl.autofilter().hideArrows();
     //tbl.setHeaderVisible(false);
-    //tbl.setTotalVisible(true);
+    tbl.setTotalVisible(true);
+    //tbl.column("Table")->setTotalsRowFunction("sum");
+    //tbl.column("Table")->setTotalsRowFunction("count");
+    tbl.column("Table").setTotalsRowFunction("count");
+    
 
 
     doc.save();
