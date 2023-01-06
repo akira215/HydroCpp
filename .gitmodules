@@ -1,3 +1,6 @@
 [submodule "OpenXLSX"]
 	path = OpenXLSX
 	url = https://github.com/akira215/OpenXLSX.git
+[submodule "nfd"]
+	path = nfd
+	url = https://github.com/akira215/nativefiledialog-extended.git
