@@ -1,60 +1,62 @@
+
+/*
+  HydroCpp
+  Repository: https://github.com/btzy/nativefiledialog-extended
+  License: GNU GENERAL PUBLIC LICENSE Version 3, 29 June 2007
+  Author: Akira Shimahara
+*/
+
+// ===== Standards Includes ===== //
+#include <stdio.h>
+#include <stdlib.h>
+#include <string>
+
+// ===== External Includes ===== //
 #include <OpenXLSX.hpp>
 #include <vector>
+#include <nfd.hpp>
+
+// ===== HydroCpp Includes ===== //
+#include "HCLog.hpp"
+#include "HCConfig.hpp"
+#include "HCLoader.hpp"
 
 using namespace std;
 using namespace OpenXLSX;
+using namespace HydroCpp;
 
 int main() {
 
-    XLDocument doc;
+    HCLogInfo(std::string("Workbook shall contain the hull hydro data in a table named \"") + HYDRO_TBL_NAME +"\"" );
+    HCLogInfo("All data shall be x: longitudinal forward y: transveral starboard z: vertical upward" );
+    HCLogInfo("x=0: aft perpendicular y=0: centerline z=0: keel" );
+    HCLogInfo("==========" );
+    HCLogInfo("Additional named range could be provided: max_wl, Δwl, φMax, Δφ, ρsw" );
     
-        // ...and reopen it (just to make sure that it is a valid .xlsx file)
-    cout << "Re-opening spreadsheet ..." << endl << endl;
-    doc.open("./Demo10.xlsx");
-    auto wks = doc.workbook().sheet(1).get<XLWorksheet>();
-    //wks = doc.workbook().worksheet(sheetName);
-
-    // We can retrieve the headers name:
-    XLTable tbl = doc.workbook().table("MyTable");
-    vector<std::string> headers = tbl.columnNames();
-
-    cout << "Table "<< tbl.name() << " header names:" << endl;
-    int i = 0;
-    for(const auto& h : headers){
-        cout << i++ << " - " << h << endl;
-    }
-
-    // We can also access different items
-    auto ncol       = tbl.columnIndex("Col"); // Retrieve the colum index by the name
-    auto sht        = tbl.getWorksheet();      // Retrieve and object worksheet
-    auto rang       = tbl.tableRange();       // whole table range including total & headers
-    auto bodyRange  = tbl.dataBodyRange();    // Only data body table range (excl. total & headers)
-    auto nRow       = tbl.rowsCount();    // Only data body table range (excl. total & headers)
-    // And iterate throught the table rows
-    auto nCol       = tbl.columnsCount();    // Only data body table range (excl. total & headers)
     
-    int j = 0;
-    for(const auto& row : tbl.tableRows()){
-        row[tbl.columnIndex("#")].value() = j;
-        row[1].value() = "Data" + to_string(j);
-        row[tbl.columnIndex("Table")].value() = (float)j * 2.0f / 3.0f;
-        j++;
-    }
+    // initialize NFD
+    NFD::Guard nfdGuard;
 
-    // Also show the total with selected function
-    tbl.autofilter().hideArrows();
-    //tbl.setHeaderVisible(false);
-    tbl.setTotalVisible(true);
-    //tbl.column("Table")->setTotalsRowFunction("sum");
-    tbl.column("Table").setTotalsRowFunction("");
-    tbl.column("Table").setTotalsRowFunction("count");
+    // auto-freeing memory
+    NFD::UniquePath outPath;
 
-    cout << "Table Style : " << tbl.tableStyle().style() << endl;
-    tbl.tableStyle().setStyle("test"); 
+    // prepare filters for the dialog
+    nfdfilteritem_t filterItem[1] = { {"Excel file", "xls,xlsx"} };
+
+    // show the dialog
+    nfdresult_t result = NFD::OpenDialog(outPath, filterItem, 1);
+    if (result == NFD_OKAY) {
+        string file = string(outPath.get());
+        HCLogInfo("Opening the file " + file + "..." );
+        HCLoader ld(file);
+        
+    } else if (result == NFD_CANCEL)
+        HCLogInfo("No file was selected, user pressed cancel.");
+    else 
+        HCLogError("Error: " + string(NFD::GetError()) );
     
 
-    doc.save();
-    doc.close();
+    // NFD::Guard will automatically quit NFD.
 
     return 0;
 }
