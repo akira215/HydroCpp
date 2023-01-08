@@ -5,6 +5,7 @@
   Author: Akira Shimahara
 */
 
+#pragma once
 
 namespace HydroCpp
 {

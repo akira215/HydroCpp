@@ -12,7 +12,7 @@
 #include <map>
 // ===== HydroCpp Includes ===== //
 #include "HCPoint.hpp"
-
+#include "HCPolygon.hpp"
 
 
 
@@ -33,8 +33,25 @@ namespace HydroCpp
          */
         ~HCLoader();
     private:
-        std::string m_filename;
-        std::map<double,std::vector<HCPoint>> m_hull;
+
+         /**
+         * @brief read data from name range in workbook
+         * @param wb the excel workbook
+         * @param rngName the range name
+         * @param defautVal which will be returned if named range doesn't exist
+         */
+        double getValueFromRange(const OpenXLSX::XLWorkbook& wb,
+                                const std::string& rngName, 
+                                double defautVal );
+    private:
+        std::string                 m_filename;
+        std::map<double,HCPolygon*>  m_hull;
+        double                      m_maxWl;
+        double                      m_deltaxWl;
+        double                      m_maxAngle;
+        double                      m_deltaAngle;
+        double                      m_d_sw;
+
     };
 
 }  // namespace std

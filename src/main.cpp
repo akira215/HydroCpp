@@ -49,12 +49,11 @@ int main() {
         string file = string(outPath.get());
         HCLogInfo("Opening the file " + file + "..." );
         HCLoader ld(file);
-        
+
     } else if (result == NFD_CANCEL)
         HCLogInfo("No file was selected, user pressed cancel.");
     else 
         HCLogError("Error: " + string(NFD::GetError()) );
-    
 
     // NFD::Guard will automatically quit NFD.
 
