@@ -55,6 +55,11 @@ HCPolygon& HCPolygon::operator=(HCPolygon&& other)
     return *this;
 }
 
+const std::vector<HCPoint>& HCPolygon::getVertices() const
+{
+    return m_vertices;
+}
+
 /////////////////////////////////////////////
 //
 // Private

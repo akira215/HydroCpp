@@ -4,6 +4,7 @@
   License: GNU GENERAL PUBLIC LICENSE Version 3, 29 June 2007
   Author: Akira Shimahara
 */
+#pragma once
 
 // ===== External Includes ===== //
 #include <vector>
@@ -13,13 +14,6 @@
 
 namespace HydroCpp
 {
-    enum class LineSide
-    {
-        On,
-        Left,
-        Right,
-    };
-
     class HCVertex 
     {
         public:
@@ -39,6 +33,8 @@ namespace HydroCpp
 
     class HCPolygon 
     {
+        friend class HCPolygonSplitter;
+        
     public:
         /**
          * @brief constructor
@@ -78,6 +74,12 @@ namespace HydroCpp
          */
         HCPolygon& operator=(HCPolygon&& other);
 
+        /**
+         * @brief return const ref of the vertices
+         * @return A reference to the mertices
+         */
+        const std::vector<HCPoint>& getVertices() const;
+
     private:
 
         /**
@@ -102,9 +104,29 @@ namespace HydroCpp
 
 
 
-    private:
+    protected:
         std::vector<HCPoint> m_vertices;
 
     };
+
+    // ========== FRIEND FUNCTION IMPLEMENTATIONS ========== //
+    
+    
+    /**
+      * @brief Compute Lz from Point M relative to segment P0,P1
+      * @param line 
+      * @param M 
+      * @return the distance from point to linz
+      * @note This allow to know from which side from the segment is M and 
+      * compare distances of several points to this segment
+      */
+    inline double distPtToSegment(const std::pair<HCPoint,HCPoint>& line, 
+                            const HCPoint& M)
+    {
+        const HCPoint& P0 = line.first;
+        const HCPoint& P1 = line.second;
+        
+        return (P1.x-P0.x)*(M.y-P0.y)-(P1.y-P0.y)*(M.x-P0.x);
+    }
 
 }  // namespace std
