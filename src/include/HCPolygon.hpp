@@ -8,33 +8,24 @@
 
 // ===== External Includes ===== //
 #include <vector>
+#include <array>
 // ===== HydroCpp Includes ===== //
 #include "HCPoint.hpp"
 
 
 namespace HydroCpp
 {
-    class HCVertex 
+    struct HCTriangle 
     {
-        public:
-            HCPoint     vertex;     // Vertex
-            HCPoint*    next;       // next vertex of the poly
-            HCPoint*    prev;       // prev vertex of the poly
-        
-        public:
-            HCVertex(const HCPoint& vertex) :
-                vertex(vertex),
-                next(nullptr),
-                prev(nullptr)
-            {}
-
-            ~HCVertex() = default;
+        HCPoint    P0;     
+        HCPoint    P1;     
+        HCPoint    P2;   
     };
 
     class HCPolygon 
     {
-        friend class HCPolygonSplitter;
-        
+        //friend class HCPolygonSplitter;
+
     public:
         /**
          * @brief constructor
@@ -80,7 +71,38 @@ namespace HydroCpp
          */
         const std::vector<HCPoint>& getVertices() const;
 
+        /**
+         * @brief get the area of the polygon
+         * @return the area
+         */
+        double getArea();
+
+        /**
+         * @brief get the cog of the polygon
+         * @return a ref to the Cog HCPoint
+         */
+        const HCPoint& getCog();
+
     private:
+
+        /**
+         * @brief Compute the area of the triangulated polygone
+         * @note shall be called before grabbing data
+         */
+        void compute();
+        
+        /**
+         * @brief Search triangles and return the triangle list
+         */
+        void triangulatePolygon();
+
+        /**
+         * @brief Recursive function to divide polygone in 2 parts, 
+         * starting by the most left vertex call recursively new polygones 
+         * until getting triangles, and fill the triangle list
+         */
+       void triangulatePolygonRecursive(std::vector<HCPoint> polygon); 
+                                   // std::vector<HCTriangle> trianglesList);
 
         /**
          * @brief check the orientation of the polygon
@@ -94,7 +116,7 @@ namespace HydroCpp
          */
         void setCounterclockwise();
 
-         /**
+        /**
          * @brief check the circular next vertex
          * @param index current index
          * @param step of the offset
@@ -102,10 +124,54 @@ namespace HydroCpp
          */
         uint16_t next(uint16_t index, int step) const;
 
+        /**
+         * @brief Return the indice of the vertex the most on the left of the polygon.
+         * If more than one vertice have the same abscisse, any of them could be return
+         * @param polygon the polygon
+         * @return Return the index of the corresponding vertex
+         */
+        static size_t mostLeftVertex(const std::vector<HCPoint>& polygon);
 
+        /**
+         * @brief Return the indice of the polygon vertex from triangle P0,P1,P2 
+         * which is the farthest from segment P1,P2
+         * @param polygon the polygon
+         * @param 3points of the triangle
+         * @param indies indices of the vertex of the selected triangle
+         * @return Return the index of the corresponding vertex
+         */
+        static size_t farthestVertex(const std::vector<HCPoint>& polygon,
+                            HCTriangle triangle,
+                            std::array<size_t, 3> indices);
+
+        /**
+         * @brief check if the point is striclty inside the triangle
+         * @param triangle an array of point
+         * @param M point to be checked
+         * @return Return True if M is striclty inside the triangle
+         * @note Triangle points shall be given counterclockwise
+         */
+        static inline bool isInTriangle(HCTriangle triangle, HCPoint& M);
+
+         /**
+         * @brief Generate a polygone from indice start to end, 
+         * considering the cyclic condition
+         * @param polygon an array of indices
+         * @param start
+         * @param start
+         * @return Return a vector of point
+         */
+        std::vector<HCPoint> newPolygon( std::vector<HCPoint> polygon, 
+                                        size_t start, size_t end);
 
     protected:
         std::vector<HCPoint> m_vertices;
+    
+    private:
+        bool m_isComputed;
+        std::vector<HCTriangle> m_trianglesList;
+        double m_area;
+        HCPoint m_cog;
 
     };
 

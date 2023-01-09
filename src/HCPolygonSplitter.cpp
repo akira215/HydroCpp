@@ -20,7 +20,7 @@ using namespace HydroCpp;
 
 HCPolygonSplitter::HCPolygonSplitter(const std::vector<HCPoint>& vertices, 
                                     const std::pair<HCPoint,HCPoint>& line) 
-        : m_vertices(), m_line(line)
+        : m_vertices(), m_line(line), m_isComputed(false)
 {
     m_intersections.clear();
     for(uint16_t i=0; i < vertices.size(); ++i) {
@@ -66,7 +66,8 @@ HCPolygonSplitter::~HCPolygonSplitter() = default;
 HCPolygonSplitter::HCPolygonSplitter(const HCPolygonSplitter& other)
                 : m_vertices(other.m_vertices), 
                 m_intersections(other.m_intersections),
-                m_line(other.m_line)
+                m_line(other.m_line),
+                m_isComputed(other.m_isComputed)
 { }
 
 HCPolygonSplitter::HCPolygonSplitter(HCPolygonSplitter&& other) = default;
@@ -98,7 +99,7 @@ HCPolygonSplitter& HCPolygonSplitter::operator=(HCPolygonSplitter&& other)
 
 std::vector<HCPolygon*> HCPolygonSplitter::getPolygonFromSide(LineSide side)
 {
-    if (m_result.empty())
+    if (!m_isComputed)
         computeIntersections();
     
     std::vector<HCPolygon*> polyFromSide;
@@ -107,8 +108,8 @@ std::vector<HCPolygon*> HCPolygonSplitter::getPolygonFromSide(LineSide side)
     for (auto& p : m_result){
         size_t i = 0;
         bool finished = false;
-        while ((i < p.m_vertices.size())&&(!finished)){
-            LineSide s = getSide(p.m_vertices[i]);
+        while ((i < p.getVertices().size())&&(!finished)){
+            LineSide s = getSide(p.getVertices()[i]);
             if (s != LineSide::On){
                 finished = true;
                 if (s == side)
@@ -116,8 +117,6 @@ std::vector<HCPolygon*> HCPolygonSplitter::getPolygonFromSide(LineSide side)
             }
             else
                 ++i;
-          
-
         }
     }
     
@@ -127,7 +126,7 @@ std::vector<HCPolygon*> HCPolygonSplitter::getPolygonFromSide(LineSide side)
 
 const std::vector<std::pair<HCPoint,HCPoint>>& HCPolygonSplitter::getEdges()
 {
-    if (m_edges.empty())
+    if (!m_isComputed)
         computeIntersections();
     
     return m_edges;
@@ -138,6 +137,7 @@ const std::vector<std::pair<HCPoint,HCPoint>>& HCPolygonSplitter::getEdges()
     sortIntersections();
     splitPolygon();
     collectPolys();
+    m_isComputed = true;
  }
 
 
@@ -236,6 +236,7 @@ void HCPolygonSplitter::splitPolygon()
 
 void HCPolygonSplitter::collectPolys()
 {
+    m_result.clear();
     for (auto &e : m_vertices)
     {
         if (!e.visited)

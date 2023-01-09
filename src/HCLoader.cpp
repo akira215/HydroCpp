@@ -59,6 +59,8 @@ HCLoader:: ~HCLoader()
     m_hull.clear();
 }
 
+
+
 void HCLoader::computeHydroTable()
 {
     //Hydrotable =[]
@@ -89,6 +91,8 @@ void HCLoader::computeHydrotable(const std::pair<HCPoint,HCPoint>& waterline )
         HCPolygonSplitter split(it->second->getVertices(), waterline);
         auto wetSection = split.getPolygonFromSide(LineSide::Right);
         auto wetEdge = split.getEdges();
+        for (auto& p : wetSection)
+            p->getArea();
 
 
 

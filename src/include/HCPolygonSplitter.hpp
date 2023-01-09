@@ -170,6 +170,7 @@ namespace HydroCpp
         std::vector<std::pair<HCPoint,HCPoint>> m_edges; //  segments along the line
         const std::pair<HCPoint,HCPoint>& m_line;
         std::vector<HCPolygon> m_result;
+        bool m_isComputed;
 
     };
 
