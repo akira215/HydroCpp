@@ -11,7 +11,7 @@
 #include <list>
 // ===== HydroCpp Includes ===== //
 #include "HCPolygon.hpp"
-
+#include "HCPolygons.hpp"
 
 namespace HydroCpp
 {
@@ -95,7 +95,7 @@ namespace HydroCpp
          * @param side The object to be move assigned
          * @return the splitted polygon on the requested side of the line
          */
-        std::vector<HCPolygon*> getPolygonFromSide(LineSide side);
+        HCPolygons& getPolygonFromSide(LineSide side);
 
         /**
          * @brief split the polygon in 2 part and get the intersected segments
@@ -165,12 +165,13 @@ namespace HydroCpp
                             const HCPoint& A, const HCPoint& B) const;
 
     private:
-        std::list<Vertex> m_vertices;       // polygons vertices
-        std::vector<Vertex*> m_intersections; // pointers of vertex along the line
+        std::list<Vertex>       m_vertices;       // polygons vertices
+        std::vector<Vertex*>    m_intersections; // pointers of vertex along the line
         std::vector<std::pair<HCPoint,HCPoint>> m_edges; //  segments along the line
         const std::pair<HCPoint,HCPoint>& m_line;
-        std::vector<HCPolygon> m_result;
-        bool m_isComputed;
+        std::vector<HCPolygon>  m_result;
+        HCPolygons              m_polys;
+        bool                    m_isComputed;
 
     };
 

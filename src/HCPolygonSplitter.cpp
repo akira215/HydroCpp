@@ -97,12 +97,12 @@ HCPolygonSplitter& HCPolygonSplitter::operator=(HCPolygonSplitter&& other)
 //
 //////////////////////////////////////////////
 
-std::vector<HCPolygon*> HCPolygonSplitter::getPolygonFromSide(LineSide side)
+HCPolygons& HCPolygonSplitter::getPolygonFromSide(LineSide side)
 {
     if (!m_isComputed)
         computeIntersections();
     
-    std::vector<HCPolygon*> polyFromSide;
+    m_polys.clear();
 
     // Check if each poly is on the right side
     for (auto& p : m_result){
@@ -113,14 +113,14 @@ std::vector<HCPolygon*> HCPolygonSplitter::getPolygonFromSide(LineSide side)
             if (s != LineSide::On){
                 finished = true;
                 if (s == side)
-                    polyFromSide.push_back(&p);
+                    m_polys.getPolygons().push_back(p);
             }
             else
                 ++i;
         }
     }
     
-    return polyFromSide;
+    return m_polys;
 
 }
 

@@ -24,7 +24,6 @@ namespace HydroCpp
 
     class HCPolygon 
     {
-        //friend class HCPolygonSplitter;
 
     public:
         /**
@@ -164,14 +163,12 @@ namespace HydroCpp
         std::vector<HCPoint> newPolygon( std::vector<HCPoint> polygon, 
                                         size_t start, size_t end);
 
-    protected:
-        std::vector<HCPoint> m_vertices;
-    
     private:
-        bool m_isComputed;
+        std::vector<HCPoint>    m_vertices;
+        bool                    m_isComputed;
         std::vector<HCTriangle> m_trianglesList;
-        double m_area;
-        HCPoint m_cog;
+        double                  m_area;
+        HCPoint                 m_cog;
 
     };
 
