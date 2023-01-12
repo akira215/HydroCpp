@@ -113,8 +113,10 @@ void HCPolygons::compute()
         m_cog = m_cog + (cog * area);
     }
 
-    m_cog.x = m_cog.x /  m_area;
-    m_cog.y = m_cog.y /  m_area;
+    if(m_area != 0.0){
+        m_cog.x = m_cog.x /  m_area;
+        m_cog.y = m_cog.y /  m_area;
+    }
             
     m_isComputed = true;
 }

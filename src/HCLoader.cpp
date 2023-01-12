@@ -80,7 +80,15 @@ void HCLoader::computeHydroTable()
 /// @param waterline /
 void HCLoader::computeHydrotable(const std::pair<HCPoint,HCPoint>& waterline )
 {
+    Hydrodata hydro;
+    if (waterline.second.x == waterline.first.x){
+        XLLogError("Error computing table : waterline is vertical");
+        return;
+    }
+    hydro.Waterline = waterline.first.y - (waterline.second.y - waterline.first.y) / 
+                        (waterline.second.x - waterline.first.x) * waterline.first.x;
     double elmtLength = 0.0;
+    uint32_t nLCF = 0;
     for (auto it = m_hull.begin(); it != m_hull.end(); ++it) {
         
         // the length of the last element will be the same as the n-1 one
@@ -92,15 +100,59 @@ void HCLoader::computeHydrotable(const std::pair<HCPoint,HCPoint>& waterline )
         auto wetSection = split.getPolygonFromSide(LineSide::Right);
         auto wetEdge = split.getEdges();
 
+        double eltVol = wetSection.getArea() * elmtLength;
+        double xelt = (*it).first + elmtLength / 2;
 
-        std::string debug = "Wl: " + std::to_string(waterline.first.y);
-        debug += " - Area: " + std::to_string(wetSection.getArea());
-        debug += " - Cog: " + std::to_string(wetSection.getCog().x) 
-                    + "," + std::to_string(wetSection.getCog().y);
-        HCLogInfo(" " + debug);
+        hydro.LCB += xelt * eltVol;
+        hydro.TCB += wetSection.getCog().x * eltVol;
+        hydro.VCB += wetSection.getCog().y * eltVol;
 
-    }
-    
+        hydro.Volume += eltVol;
+        hydro.Lpp += elmtLength;
+
+        // Compute for each edge of the waterline cut the lentgh and the inertia
+        double interLength = 0.0;
+        for(const auto& s : wetEdge){
+            interLength += s.first.distanceTo(s.second);
+            HCPoint midSectionPt = HCPoint( (s.first.x + s.second.x) / 2,
+                                           (s.first.y + s.second.y) / 2 );
+            // Transport the inertia at x = 0 waterline
+            double dt = midSectionPt.distanceTo(HCPoint( 0.0, hydro.Waterline ));
+            hydro.RMT += elmtLength * pow(interLength, 3) /12 +
+                        (interLength * elmtLength) * pow(dt, 2);
+        }
+
+        hydro.RML += interLength * pow(elmtLength, 3) / 12 + (interLength * elmtLength) * pow(xelt, 2);
+        hydro.WaterplaneArea += interLength * elmtLength;
+
+        if (wetSection.getArea() != 0){
+            if (nLCF == 0){
+                hydro.LCF += (*it).first;
+                nLCF += 1;
+            }
+            hydro.LCF += (*it).first + elmtLength;
+            nLCF +=1;
+        }
+
+    } // Section Loop
+
+    // If null don't save the data
+    if ((nLCF == 0 )|| (hydro.Volume == 0.0))
+        return;
+    hydro.LCF /= nLCF;
+    hydro.LCB /= hydro.Volume;
+    hydro.TCB /= hydro.Volume;
+    hydro.VCB /= hydro.Volume;
+    hydro.Displacement = hydro.Volume  * m_d_sw;
+    hydro.Immersion = hydro.WaterplaneArea * m_d_sw / 100; // in t/cm
+    hydro.RMT -= hydro.WaterplaneArea * pow (hydro.TCB,2); // Transport RMT to CoB
+    hydro.RMT /= hydro.Displacement;
+    hydro.RML -= hydro.WaterplaneArea * pow (hydro.LCB,2); // Transport RML to CoB  
+    hydro.RML /= hydro.Displacement; 
+    hydro.MCT = hydro.Displacement * hydro.RML / (100 * hydro.Lpp);
+    hydro.KMT = hydro.RMT + hydro.VCB;  
+
+    m_hydroTable.push_back(hydro); 
 
 }
 

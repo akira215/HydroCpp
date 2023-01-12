@@ -36,20 +36,20 @@ namespace HydroCpp
      */
     struct Hydrodata
     {
-        double RMT;
-        double RML;
-        double Lpp;
-        double LCF;
-        double MCT;
-        double LCB;
-        double TCB;
-        double VCB;
-        double KMT;
-        double Waterline;
-        double Volume;
-        double Displacement;
-        double WaterplaneArea;
-        double Immersion;
+        double RMT              {0.0};
+        double RML              {0.0};
+        double Lpp              {0.0};
+        double LCF              {0.0};
+        double MCT              {0.0};
+        double LCB              {0.0};
+        double TCB              {0.0};
+        double VCB              {0.0};
+        double KMT              {0.0};
+        double Waterline        {0.0};
+        double Volume           {0.0};
+        double Displacement     {0.0};
+        double WaterplaneArea   {0.0};
+        double Immersion        {0.0};
     };
 
 
@@ -98,7 +98,7 @@ namespace HydroCpp
     private:
         std::string                 m_filename;
         std::map<double,HCPolygon*>  m_hull;
-        std::vector<Hydrodata*>     m_hydroTable;
+        std::vector<Hydrodata>      m_hydroTable;
         MinMax                      m_minMax {
                     std::numeric_limits<double>::max(), //xmin
                     std::numeric_limits<double>::min(), //xmax
