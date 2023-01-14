@@ -50,6 +50,18 @@ namespace HydroCpp
         double Displacement     {0.0};
         double WaterplaneArea   {0.0};
         double Immersion        {0.0};
+        bool   isValid          {false};
+    };
+
+    struct KNdata
+    {
+        double angle            {0.0};
+        double Waterline        {0.0};
+        double Volume           {0.0};
+        double Displacement     {0.0};
+        double KNsin            {0.0};
+        double Hmeta            {0.0};
+        bool   isValid          {false};
     };
 
 
@@ -68,10 +80,16 @@ namespace HydroCpp
          */
         ~HCLoader();
 
-         /**
+        /**
          * @brief Compute Volume, LCB, VCB for each waterline step.Feed the member variable
          */
         void computeHydroTable();
+
+
+        /**
+         * @brief Compute Volume, Zc, Hmeta, KN for each waterline step and each angle
+         */
+        void computeKNdatas();
 
     private:
 
@@ -93,12 +111,19 @@ namespace HydroCpp
 
         /**
          * @brief compute the hydrodata for a given waterline
+         * @note return HCPoint(0,-1) in case of error
          */
-        void computeHydrotable(const std::pair<HCPoint,HCPoint>& waterline );
+        Hydrodata computeHydroFromWaterline(const std::pair<HCPoint,HCPoint>& waterline );
+        
+        /**
+         * @brief retrieve the COG in section from a volume in hydrotable
+         */
+        HCPoint getEvenCoBFromVolume(double Volume);
     private:
         std::string                 m_filename;
         std::map<double,HCPolygon*>  m_hull;
         std::vector<Hydrodata>      m_hydroTable;
+        std::vector<KNdata>         m_KNdatas;
         MinMax                      m_minMax {
                     std::numeric_limits<double>::max(), //xmin
                     std::numeric_limits<double>::min(), //xmax

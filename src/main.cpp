@@ -50,6 +50,7 @@ int main() {
         HCLogInfo("Opening the file " + file + "..." );
         HCLoader ld(file);
         ld.computeHydroTable();
+        ld.computeKNdatas();
 
     } else if (result == NFD_CANCEL)
         HCLogInfo("No file was selected, user pressed cancel.");

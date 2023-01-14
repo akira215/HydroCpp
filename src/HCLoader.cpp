@@ -4,6 +4,8 @@
   License: GNU GENERAL PUBLIC LICENSE Version 3, 29 June 2007
   Author: Akira Shimahara
 */
+
+#define _USE_MATH_DEFINES
 // ===== Standards Includes ===== //
 #include <utility>
 #include <cmath>
@@ -63,27 +65,109 @@ HCLoader:: ~HCLoader()
 
 void HCLoader::computeHydroTable()
 {
-    //Hydrotable =[]
     double wl = m_deltaWl;
+    m_hydroTable.clear();
+    HCLogInfo("Starting computation of hydrotable from " + std::to_string(wl) +
+                " to " + std::to_string(m_maxWl) + " steps " + std::to_string(m_deltaWl));
+    
 
     while (wl <= m_maxWl) {
         // waterline form left to right
         auto waterline = std::make_pair(HCPoint(m_minMax.xmin-1, wl),
                                         HCPoint(m_minMax.xmax+1, wl));
-        computeHydrotable(waterline);
+        Hydrodata newItem = computeHydroFromWaterline(waterline);
+        if (newItem.isValid)
+            m_hydroTable.push_back(newItem);
         wl += m_deltaWl;
     }
     
     //return Hydrotable
 }
+
+void HCLoader::computeKNdatas()
+{
+    double angle = 0.000001;
+    angle = 5.0; //TODEL//////////////////////////////
+    m_KNdatas.clear();
+    HCLogInfo("Starting computation of KN datas from " + std::to_string(angle) +
+                "° to " + std::to_string(m_maxAngle) + "° steps " + std::to_string(m_deltaAngle)+"°");
+    
+    while(angle <= m_maxAngle){
+        double wl = m_deltaWl;
+        bool first = true;
+        bool finished = false;
+        double tanPhi = tan(angle * M_PI/180);
+        HCPoint startPt = HCPoint(m_minMax.xmin - 1, -(m_minMax.xmax - m_minMax.xmin + 1) * tanPhi);
+        HCPoint endPt = HCPoint(m_minMax.xmax + 1, tanPhi);
+
+        while (wl <= m_maxWl){ // Loop through the waterline, stops when the waterplane is null
+            //waterline from left to right
+            startPt.y += m_deltaWl;
+            endPt.y += m_deltaWl;
+            auto waterline = std::make_pair(startPt, endPt);
+            auto res = computeHydroFromWaterline(waterline);
+            if (res.WaterplaneArea == 0.0){
+                if (!first)
+                    finished = true;
+            } else {
+                first = false;
+                KNdata newData;
+                HCPoint evenCoB = getEvenCoBFromVolume(res.Volume);// deal with res
+                newData.angle = angle;
+                newData.Volume = res.Volume;
+                newData.Displacement = res.Displacement;
+                newData.Waterline = res.Waterline;
+                newData.Hmeta = res.KMT;
+                double My = res.TCB / tan(angle * M_PI / 180) + res.VCB;
+                newData.KNsin = My * sin (angle * M_PI / 180);
+                newData.Hmeta = newData.KNsin * sin (angle * M_PI / 180);
+                newData.isValid = true;
+                m_KNdatas.push_back(newData);
+            }
+            wl += m_deltaWl;
+        } // Loop throuh waterlevel
+        angle += m_deltaAngle;
+    } // Loop through angle
+
+}
 /// @brief ///////////////////////////////////////////////////////////////////////////////////
 /// @param waterline /
-void HCLoader::computeHydrotable(const std::pair<HCPoint,HCPoint>& waterline )
+
+HCPoint HCLoader::getEvenCoBFromVolume(double Volume)
+{
+    if (Volume<m_hydroTable[0].Volume){
+        // interpolation to 0
+        double b = Volume  / m_hydroTable[0].Volume;
+        return HCPoint( b * m_hydroTable[0].TCB,  b * m_hydroTable[0].VCB);
+    }
+
+    for (auto it = std::begin(m_hydroTable); it != std::end(m_hydroTable); ++it){
+        auto next = std::next(it);
+        if (next != std::end(m_hydroTable)){
+            if (((*it).Volume < Volume ) && (Volume <= (*next).Volume )){
+                double div = ((*next).Volume - (*it).Volume);
+                if(div == 0.0){
+                    HCLogError("Error, 2 waterline gave the same volume");
+                    return HCPoint(0,-1); // y = -1 impossible
+                }
+
+                double a = ((*next).Volume - Volume) / div;
+                double b = (Volume -  (*it).Volume) / div;
+                return HCPoint( a * (*it).TCB + b * (*next).TCB, a * (*it).VCB + b * (*next).VCB);
+            }
+        }
+    }
+
+    return HCPoint(0,-1); // y = -1 impossible
+}
+
+
+Hydrodata HCLoader::computeHydroFromWaterline(const std::pair<HCPoint,HCPoint>& waterline )
 {
     Hydrodata hydro;
     if (waterline.second.x == waterline.first.x){
-        XLLogError("Error computing table : waterline is vertical");
-        return;
+        HCLogError("Error computing table : waterline is vertical");
+        return hydro;
     }
     hydro.Waterline = waterline.first.y - (waterline.second.y - waterline.first.y) / 
                         (waterline.second.x - waterline.first.x) * waterline.first.x;
@@ -138,7 +222,7 @@ void HCLoader::computeHydrotable(const std::pair<HCPoint,HCPoint>& waterline )
 
     // If null don't save the data
     if ((nLCF == 0 )|| (hydro.Volume == 0.0))
-        return;
+        return hydro;
     hydro.LCF /= nLCF;
     hydro.LCB /= hydro.Volume;
     hydro.TCB /= hydro.Volume;
@@ -152,7 +236,8 @@ void HCLoader::computeHydrotable(const std::pair<HCPoint,HCPoint>& waterline )
     hydro.MCT = hydro.Displacement * hydro.RML / (100 * hydro.Lpp);
     hydro.KMT = hydro.RMT + hydro.VCB;  
 
-    m_hydroTable.push_back(hydro); 
+    hydro.isValid = true;
+    return hydro; 
 
 }
 
