@@ -25,7 +25,7 @@ HCLoader::HCLoader(const std::string& filename):m_filename(filename)
     XLDocument doc;
     doc.open(m_filename);
     XLWorkbook wb = doc.workbook();
-    XLTable tbl = wb.table(HYDRO_TBL_NAME);
+    XLTable tbl = wb.table(HULL_TBL_NAME);
 
     uint16_t nx = tbl.columnIndex("x");
     uint16_t ny = tbl.columnIndex("y");
@@ -65,11 +65,16 @@ void HCLoader::writeToWorkbook()
     doc.open(m_filename);
     XLWorkbook wb = doc.workbook();
     
+
+    //TODO delete table
     if(wb.sheetExists(HYDRO_SHEET_NAME))
         wb.deleteSheet(HYDRO_SHEET_NAME);
     
     auto wksHydro = wb.addWorksheet(HYDRO_SHEET_NAME);
     writeHydroTable(wksHydro);
+    OpenXLSX::XLCellReference bl(m_hydroTable.size() + 1, 14);
+    std::string ref = "A1:" + bl.address(false);
+    auto tblHydro = wb.addTable(HYDRO_SHEET_NAME, HYDRO_TBL_NAME, ref );
 
 
 
@@ -99,6 +104,30 @@ void HCLoader::writeHydroTable(XLWorksheet& wksHydro) const
     auto headerRow = wksHydro.row(1);
     headerRow.values() = header;
 
+    std::vector<XLCellValue> rowValues;
+    for (size_t i = 0; i < m_hydroTable.size(); ++i){
+        auto row = wksHydro.row(i+2);
+        rowValues.clear();
+
+        const Hydrodata& d = m_hydroTable[i];
+
+        rowValues.emplace_back(d.Waterline);
+        rowValues.emplace_back(d.Volume);
+        rowValues.emplace_back(d.Displacement);
+        rowValues.emplace_back(d.Immersion);
+        rowValues.emplace_back(d.MCT);
+        rowValues.emplace_back(d.LCB);
+        rowValues.emplace_back(d.TCB);
+        rowValues.emplace_back(d.LCF);
+        rowValues.emplace_back(d.KMT);
+        rowValues.emplace_back(d.WaterplaneArea);
+        rowValues.emplace_back(d.RMT);
+        rowValues.emplace_back(d.RML);
+        rowValues.emplace_back(d.VCB);
+        rowValues.emplace_back(d.Lpp);
+
+        row.values() = rowValues;
+    }
 
 }
 

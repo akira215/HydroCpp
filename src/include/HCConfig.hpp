@@ -6,9 +6,11 @@
 */
 #pragma once
 
-#define HYDRO_TBL_NAME "tbl_Hullform"
+#define HULL_TBL_NAME "tbl_Hullform"
 
 #define HYDRO_SHEET_NAME "HydroComputation"
+#define HYDRO_TBL_NAME   "tbl_HydroComputation"
+
 #define KN_SHEET_NAME "KNComputation"
 
 #define MAX_WL_NAME       "max_wl"
