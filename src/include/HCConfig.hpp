@@ -8,6 +8,9 @@
 
 #define HYDRO_TBL_NAME "tbl_Hullform"
 
+#define HYDRO_SHEET_NAME "HydroComputation"
+#define KN_SHEET_NAME "KNComputation"
+
 #define MAX_WL_NAME       "max_wl"
 #define DELTA_WL_NAME     "Δwl"
 #define MAX_ANGLE_NAME    "φMax"

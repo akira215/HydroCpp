@@ -49,8 +49,10 @@ int main() {
         string file = string(outPath.get());
         HCLogInfo("Opening the file " + file + "..." );
         HCLoader ld(file);
+        
         ld.computeHydroTable();
         ld.computeKNdatas();
+        ld.writeToWorkbook();
 
     } else if (result == NFD_CANCEL)
         HCLogInfo("No file was selected, user pressed cancel.");

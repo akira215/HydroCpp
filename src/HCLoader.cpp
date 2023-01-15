@@ -51,8 +51,6 @@ HCLoader::HCLoader(const std::string& filename):m_filename(filename)
         checkMinMax(value);
     }
 
-
-    //doc.save();
     doc.close();
 }
 
@@ -61,6 +59,71 @@ HCLoader:: ~HCLoader()
     m_hull.clear();
 }
 
+void HCLoader::writeToWorkbook()
+{
+    XLDocument doc;
+    doc.open(m_filename);
+    XLWorkbook wb = doc.workbook();
+    
+    if(wb.sheetExists(HYDRO_SHEET_NAME))
+        wb.deleteSheet(HYDRO_SHEET_NAME);
+    
+    auto wksHydro = wb.addWorksheet(HYDRO_SHEET_NAME);
+    writeHydroTable(wksHydro);
+
+
+
+    doc.save();
+    doc.close();
+
+}
+
+void HCLoader::writeHydroTable(XLWorksheet& wksHydro) const 
+{
+    std::vector<XLCellValue> header;
+    header.emplace_back("Draught");
+    header.emplace_back("Volume");
+    header.emplace_back("Displacement");
+    header.emplace_back("Immersion");
+    header.emplace_back("MCT");
+    header.emplace_back("LCB");
+    header.emplace_back("TCB");
+    header.emplace_back("LCF");
+    header.emplace_back("KMT");
+    header.emplace_back("WaterplaneArea");
+    header.emplace_back("RMT");
+    header.emplace_back("RML");
+    header.emplace_back("VCB");
+    header.emplace_back("Lpp");
+
+    auto headerRow = wksHydro.row(1);
+    headerRow.values() = header;
+
+
+}
+
+const std::vector<XLCellValue> HCLoader::getHydroRow(size_t index) const
+{
+    std::vector<XLCellValue> writeValues;
+    const Hydrodata& d = m_hydroTable[index];
+
+    writeValues.emplace_back(d.Waterline);
+    writeValues.emplace_back(d.Volume);
+    writeValues.emplace_back(d.Displacement);
+    writeValues.emplace_back(d.Immersion);
+    writeValues.emplace_back(d.MCT);
+    writeValues.emplace_back(d.LCB);
+    writeValues.emplace_back(d.TCB);
+    writeValues.emplace_back(d.LCF);
+    writeValues.emplace_back(d.KMT);
+    writeValues.emplace_back(d.WaterplaneArea);
+    writeValues.emplace_back(d.RMT);
+    writeValues.emplace_back(d.RML);
+    writeValues.emplace_back(d.VCB);
+    writeValues.emplace_back(d.Lpp);
+
+    return writeValues;
+}
 
 
 void HCLoader::computeHydroTable()
@@ -86,8 +149,8 @@ void HCLoader::computeHydroTable()
 
 void HCLoader::computeKNdatas()
 {
-    double angle = 0.000001;
-    angle = 5.0; //TODEL//////////////////////////////
+    double angle = 0.00000001;
+    //angle = 5.0; //TODEL//////////////////////////////
     m_KNdatas.clear();
     HCLogInfo("Starting computation of KN datas from " + std::to_string(angle) +
                 "° to " + std::to_string(m_maxAngle) + "° steps " + std::to_string(m_deltaAngle)+"°");

@@ -91,6 +91,11 @@ namespace HydroCpp
          */
         void computeKNdatas();
 
+        /**
+         * @brief write data to workbook
+         */
+        void writeToWorkbook();
+
     private:
 
          /**
@@ -119,6 +124,20 @@ namespace HydroCpp
          * @brief retrieve the COG in section from a volume in hydrotable
          */
         //HCPoint getEvenCoBFromVolume(double Volume);
+
+        /**
+         * @brief write Hydrotable on the corresponding shhet
+         * @param wksHydro the worksheet to write on 
+         */
+        void writeHydroTable(OpenXLSX::XLWorksheet& wksHydro) const;
+
+        /**
+         * @brief 
+         * @note order is : waterline,volume, displacement, immersion, MCT, 
+         *                  LCB, TCB, LCF, KMT, waterplane,RMT, RML, VCB, Lpp
+         */
+        const std::vector<OpenXLSX::XLCellValue> getHydroRow(size_t index) const;
+
     private:
         std::string                 m_filename;
         std::map<double,HCPolygon*>  m_hull;
