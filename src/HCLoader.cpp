@@ -180,7 +180,7 @@ Hydrodata HCLoader::computeHydroFromWaterline(const std::pair<HCPoint,HCPoint>& 
         if (next != m_hull.end())
             elmtLength = abs(next->first - it->first);
 
-        HCPolygonSplitter split(it->second->getVertices(), waterline);
+        HCPolygonSplitter split(it->second, waterline);
         auto wetSection = split.getPolygonFromSide(LineSide::Right);
         auto wetEdge = split.getEdges();
 

@@ -59,6 +59,11 @@ HCPolygonSplitter::HCPolygonSplitter(const std::vector<HCPoint>& vertices,
        
 }
 
+HCPolygonSplitter::HCPolygonSplitter(const HCPolygon* polygon, 
+                                    const std::pair<HCPoint,HCPoint>& line) :
+    HCPolygonSplitter(polygon->getVertices(), line)
+{ }
+
 
 HCPolygonSplitter::~HCPolygonSplitter() = default;
         
@@ -105,15 +110,15 @@ HCPolygons& HCPolygonSplitter::getPolygonFromSide(LineSide side)
     m_polys.clear();
 
     // Check if each poly is on the right side
-    for (auto& p : m_result){
+    for (auto& p : m_collected){
         size_t i = 0;
         bool finished = false;
-        while ((i < p.getVertices().size())&&(!finished)){
-            LineSide s = getSide(p.getVertices()[i]);
+        while ((i < p.vertices.size())&&(!finished)){
+            LineSide s = p.side;
             if (s != LineSide::On){
                 finished = true;
                 if (s == side)
-                    m_polys.getPolygons().push_back(p);
+                    m_polys.getPolygons().push_back(HCPolygon(p.vertices));
             }
             else
                 ++i;
@@ -236,23 +241,25 @@ void HCPolygonSplitter::splitPolygon()
 
 void HCPolygonSplitter::collectPolys()
 {
-    m_result.clear();
+    m_collected.clear();
     for (auto &e : m_vertices)
     {
         if (!e.visited)
         {
-            std::vector<HCPoint> poly;
+            SplitPoly sPoly;
             auto *curPt = &e;
 
             do
             {
                 curPt->visited = true;
-                poly.push_back(curPt->pt);
+                sPoly.vertices.push_back(curPt->pt);
+                if (curPt->side != LineSide::On)
+                    sPoly.side = curPt->side;
                 curPt = curPt->next;
             }
             while (curPt != &e);
 
-            m_result.push_back(HCPolygon(poly));
+            m_collected.push_back(sPoly);
         }
     }
 
@@ -289,7 +296,7 @@ LineSide HCPolygonSplitter::getSide( const HCPoint& M) const
 {
     double dist = distPtToSegment(m_line, M);
 
-    if (dist == 0)
+    if (std::abs(dist) < 1e-8)
         return LineSide::On;
 
     if (dist < 0)

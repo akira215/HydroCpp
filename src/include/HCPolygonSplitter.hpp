@@ -41,6 +41,19 @@ namespace HydroCpp
         ~Vertex() = default;
     };
 
+    class SplitPoly
+    {
+    public:
+        std::vector<HCPoint>    vertices;
+        LineSide    side        { LineSide::Undef };
+    public:
+        SplitPoly() : vertices(), side( LineSide::Undef )
+        {}
+
+        ~SplitPoly() = default;
+
+    };
+
     class HCPolygonSplitter 
     {
          //---------- Friend Declarations ----------//
@@ -56,6 +69,15 @@ namespace HydroCpp
          * @note initialize the double linked list of vertices, including intersections points
          */
         HCPolygonSplitter(const std::vector<HCPoint>& vertices,
+                            const std::pair<HCPoint,HCPoint>& line );
+
+         /**
+         * @brief constructor
+         * @param polygon
+         * @param line
+         * @note initialize the double linked list of vertices, including intersections points
+         */
+        HCPolygonSplitter(const HCPolygon* polygon,
                             const std::pair<HCPoint,HCPoint>& line );
 
         /**
@@ -169,7 +191,7 @@ namespace HydroCpp
         std::vector<Vertex*>    m_intersections; // pointers of vertex along the line
         std::vector<std::pair<HCPoint,HCPoint>> m_edges; //  segments along the line
         const std::pair<HCPoint,HCPoint>& m_line;
-        std::vector<HCPolygon>  m_result;
+        std::vector<SplitPoly>  m_collected;
         HCPolygons              m_polys;
         bool                    m_isComputed;
 

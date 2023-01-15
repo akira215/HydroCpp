@@ -179,7 +179,7 @@ namespace HydroCpp
       * @brief Compute Lz from Point M relative to segment P0,P1
       * @param line 
       * @param M 
-      * @return the distance from point to linz
+      * @return the distance from point to line
       * @note This allow to know from which side from the segment is M and 
       * compare distances of several points to this segment
       */
