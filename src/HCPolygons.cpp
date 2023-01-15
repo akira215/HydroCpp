@@ -94,6 +94,11 @@ void HCPolygons::clear()
     m_isComputed = false;
 }
 
+bool HCPolygons::empty()
+{
+    return m_polys.empty();
+}
+
 /////////////////////////////////////////////
 //
 // Private

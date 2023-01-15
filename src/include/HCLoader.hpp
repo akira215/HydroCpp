@@ -51,6 +51,7 @@ namespace HydroCpp
         double WaterplaneArea   {0.0};
         double Immersion        {0.0};
         bool   isValid          {false};
+        bool   submerged        {false};
     };
 
     struct KNdata
@@ -60,7 +61,6 @@ namespace HydroCpp
         double Volume           {0.0};
         double Displacement     {0.0};
         double KNsin            {0.0};
-        double Hmeta            {0.0};
         bool   isValid          {false};
     };
 
@@ -118,7 +118,7 @@ namespace HydroCpp
         /**
          * @brief retrieve the COG in section from a volume in hydrotable
          */
-        HCPoint getEvenCoBFromVolume(double Volume);
+        //HCPoint getEvenCoBFromVolume(double Volume);
     private:
         std::string                 m_filename;
         std::map<double,HCPolygon*>  m_hull;

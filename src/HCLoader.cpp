@@ -94,33 +94,28 @@ void HCLoader::computeKNdatas()
     
     while(angle <= m_maxAngle){
         double wl = m_deltaWl;
-        bool first = true;
         bool finished = false;
         double tanPhi = tan(angle * M_PI/180);
         HCPoint startPt = HCPoint(m_minMax.xmin - 1, -(m_minMax.xmax - m_minMax.xmin + 1) * tanPhi);
         HCPoint endPt = HCPoint(m_minMax.xmax + 1, tanPhi);
 
-        while (wl <= m_maxWl){ // Loop through the waterline, stops when the waterplane is null
+        while (!finished){ // Loop through the waterline, stops when the waterplane is null
             //waterline from left to right
             startPt.y += m_deltaWl;
             endPt.y += m_deltaWl;
             auto waterline = std::make_pair(startPt, endPt);
             auto res = computeHydroFromWaterline(waterline);
-            if (res.WaterplaneArea == 0.0){
-                if (!first)
-                    finished = true;
+            if (res.submerged){
+                finished = true;
             } else {
-                first = false;
                 KNdata newData;
-                HCPoint evenCoB = getEvenCoBFromVolume(res.Volume);// deal with res
+                //HCPoint evenCoB = getEvenCoBFromVolume(res.Volume);// deal with res
                 newData.angle = angle;
                 newData.Volume = res.Volume;
                 newData.Displacement = res.Displacement;
                 newData.Waterline = res.Waterline;
-                newData.Hmeta = res.KMT;
                 double My = res.TCB / tan(angle * M_PI / 180) + res.VCB;
                 newData.KNsin = My * sin (angle * M_PI / 180);
-                newData.Hmeta = newData.KNsin * sin (angle * M_PI / 180);
                 newData.isValid = true;
                 m_KNdatas.push_back(newData);
             }
@@ -130,9 +125,8 @@ void HCLoader::computeKNdatas()
     } // Loop through angle
 
 }
-/// @brief ///////////////////////////////////////////////////////////////////////////////////
-/// @param waterline /
 
+/*
 HCPoint HCLoader::getEvenCoBFromVolume(double Volume)
 {
     if (Volume<m_hydroTable[0].Volume){
@@ -160,7 +154,7 @@ HCPoint HCLoader::getEvenCoBFromVolume(double Volume)
 
     return HCPoint(0,-1); // y = -1 impossible
 }
-
+*/
 
 Hydrodata HCLoader::computeHydroFromWaterline(const std::pair<HCPoint,HCPoint>& waterline )
 {
@@ -182,6 +176,11 @@ Hydrodata HCLoader::computeHydroFromWaterline(const std::pair<HCPoint,HCPoint>& 
 
         HCPolygonSplitter split(it->second, waterline);
         auto wetSection = split.getPolygonFromSide(LineSide::Right);
+        auto drySection = split.getPolygonFromSide(LineSide::Left);
+        
+        if (drySection.empty())
+            hydro.submerged = true;
+
         auto wetEdge = split.getEdges();
 
         double eltVol = wetSection.getArea() * elmtLength;

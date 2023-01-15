@@ -86,6 +86,12 @@ namespace HydroCpp
          * @note the status is changed to not computed
          */
         void clear();
+
+        /**
+         * @brief check if the object is empty
+         * @return true if there is no polygons inside, false otherwie
+         */
+        bool empty();
     
     protected:
 
