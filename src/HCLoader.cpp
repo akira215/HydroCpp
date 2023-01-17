@@ -9,6 +9,8 @@
 // ===== Standards Includes ===== //
 #include <utility>
 #include <cmath>
+#include <sstream>
+#include <iomanip>
 // ===== External Includes ===== //
 #include <OpenXLSX.hpp>
 // ===== HydroCpp Includes ===== //
@@ -40,16 +42,25 @@ HCLoader::HCLoader(const std::string& filename):m_filename(filename)
         hull[x].push_back(HCPoint(y, z)); // step required to gather all the x
     }
 
-    m_maxWl         = getValueFromRange(wb, MAX_WL_NAME,        MAX_WL_DEF );
-    m_deltaWl       = getValueFromRange(wb, DELTA_WL_NAME,      DELTA_WL_DEF );
-    m_maxAngle      = getValueFromRange(wb, MAX_ANGLE_NAME,     MAX_ANGLE_DEF );
-    m_deltaAngle    = getValueFromRange(wb, DELTA_ANGLE_NAME,   DELTA_ANGLE_DEF );
-    m_d_sw          = getValueFromRange(wb, D_SW_NAME,          D_SW_DEF );
-
+    // Get hull max values
     for (const auto& [key, value]: hull) {
         m_hull[key] = new HCPolygon(value);
         checkMinMax(value);
     }
+
+    m_maxWl         = getValueFromRange(wb, MAX_WL_NAME,        MAX_WL_DEF );
+    m_deltaWl       = getValueFromRange(wb, DELTA_WL_NAME,      DELTA_WL_DEF );
+
+    // Length of the ship minus the step
+    double DisplMax = m_hull.rbegin()->first - m_hull.begin()->first;
+    DisplMax *= (m_minMax.xmax - m_minMax.xmin);
+    DisplMax *= m_maxWl;
+
+    m_maxAngle      = getValueFromRange(wb, MAX_ANGLE_NAME,     MAX_ANGLE_DEF );
+    m_deltaAngle    = getValueFromRange(wb, DELTA_ANGLE_NAME,   DELTA_ANGLE_DEF );
+    m_maxDispl      = getValueFromRange(wb, MAX_DISPL_NAME,     /*MAX_DISPL_DEF*/ DisplMax );
+    m_deltaDispl    = getValueFromRange(wb, DELTA_DISPL_NAME,   DELTA_DISPL_DEF );
+    m_d_sw          = getValueFromRange(wb, D_SW_NAME,          D_SW_DEF );
 
     doc.close();
 }
@@ -66,24 +77,38 @@ void HCLoader::writeToWorkbook()
     XLWorkbook wb = doc.workbook();
     
 
-    //TODO delete table
+    // Write Hydro table
     if(wb.sheetExists(HYDRO_SHEET_NAME))
         wb.deleteSheet(HYDRO_SHEET_NAME);
     
     auto wksHydro = wb.addWorksheet(HYDRO_SHEET_NAME);
+    wksHydro.setTabColor(OpenXLSX::XLColor("C00000"));
     writeHydroTable(wksHydro);
     OpenXLSX::XLCellReference bl(m_hydroTable.size() + 1, 14);
     std::string ref = "A1:" + bl.address(false);
     auto tblHydro = wb.addTable(HYDRO_SHEET_NAME, HYDRO_TBL_NAME, ref );
+    tblHydro.tableStyle().setStyle("TableStyleMedium2");
+    tblHydro.autofilter().hideArrows();
 
+    // Write KN table
+     if(wb.sheetExists(KN_SHEET_NAME))
+        wb.deleteSheet(KN_SHEET_NAME);
+    
+    auto wksKN = wb.addWorksheet(KN_SHEET_NAME);
+    wksKN.setTabColor(OpenXLSX::XLColor("C00000"));
+    uint32_t n = writeKNTable(wksKN);
+    OpenXLSX::XLCellReference blk(n + 1, m_KNdatas.size() + 3);
+    ref = "A1:" + blk.address(false);
+    auto tblKN = wb.addTable(KN_SHEET_NAME, KN_TBL_NAME, ref );
+    tblKN.tableStyle().setStyle("TableStyleMedium2");
+    tblKN.autofilter().hideArrows();
 
-
+    // Save and close
     doc.save();
     doc.close();
-
 }
 
-void HCLoader::writeHydroTable(XLWorksheet& wksHydro) const 
+void HCLoader::writeHydroTable(XLWorksheet& wks) const 
 {
     std::vector<XLCellValue> header;
     header.emplace_back("Draught");
@@ -101,12 +126,12 @@ void HCLoader::writeHydroTable(XLWorksheet& wksHydro) const
     header.emplace_back("VCB");
     header.emplace_back("Lpp");
 
-    auto headerRow = wksHydro.row(1);
+    auto headerRow = wks.row(1);
     headerRow.values() = header;
 
     std::vector<XLCellValue> rowValues;
     for (size_t i = 0; i < m_hydroTable.size(); ++i){
-        auto row = wksHydro.row(i+2);
+        auto row = wks.row(i+2);
         rowValues.clear();
 
         const Hydrodata& d = m_hydroTable[i];
@@ -131,27 +156,55 @@ void HCLoader::writeHydroTable(XLWorksheet& wksHydro) const
 
 }
 
-const std::vector<XLCellValue> HCLoader::getHydroRow(size_t index) const
+uint32_t HCLoader::writeKNTable(XLWorksheet& wks) const 
 {
-    std::vector<XLCellValue> writeValues;
-    const Hydrodata& d = m_hydroTable[index];
+    // Setup and write header list
+    std::vector<XLCellValue> header;
+    header.emplace_back("Draught");
+    header.emplace_back("Volume");
+    header.emplace_back("Displacement");
+    // loop through angles
+    for(auto const& angle: m_KNdatas){
+        std::stringstream ss;
+        ss << std::fixed << std::setprecision(2) << angle.first;
+        header.emplace_back(ss.str());
+    }
+        
+    auto headerRow = wks.row(1);
+    headerRow.values() = header;
 
-    writeValues.emplace_back(d.Waterline);
-    writeValues.emplace_back(d.Volume);
-    writeValues.emplace_back(d.Displacement);
-    writeValues.emplace_back(d.Immersion);
-    writeValues.emplace_back(d.MCT);
-    writeValues.emplace_back(d.LCB);
-    writeValues.emplace_back(d.TCB);
-    writeValues.emplace_back(d.LCF);
-    writeValues.emplace_back(d.KMT);
-    writeValues.emplace_back(d.WaterplaneArea);
-    writeValues.emplace_back(d.RMT);
-    writeValues.emplace_back(d.RML);
-    writeValues.emplace_back(d.VCB);
-    writeValues.emplace_back(d.Lpp);
+    uint32_t i = 0;
+    std::vector<XLCellValue> rowValues;
+    for (double displ = 10 * m_deltaDispl ; displ < m_maxDispl; displ += m_deltaDispl ){
+        auto row = wks.row(i+2);
+        rowValues.clear();
 
-    return writeValues;
+        auto wV = getWlandVol(displ);
+
+        if(wV.first != -1)
+            rowValues.emplace_back(wV.first);
+        else
+            rowValues.emplace_back("");
+    
+        if(wV.second != -1)
+            rowValues.emplace_back(wV.second);
+        else
+            rowValues.emplace_back("");
+
+        rowValues.emplace_back(displ);
+        
+        for(auto const& angle: m_KNdatas){
+            double KNval = getKNsin(angle.first, displ);
+            if(KNval == std::numeric_limits<double>::min())
+                rowValues.emplace_back("");
+            else
+                rowValues.emplace_back(KNval);
+        }
+
+        row.values() = rowValues;
+        ++i;
+    }
+    return i;
 }
 
 
@@ -173,14 +226,13 @@ void HCLoader::computeHydroTable()
         wl += m_deltaWl;
     }
     
-    //return Hydrotable
 }
 
 void HCLoader::computeKNdatas()
 {
-    double angle = 0.00000001;
-    //angle = 5.0; //TODEL//////////////////////////////
-    m_KNdatas.clear();
+    double angle = ANGLE0;
+    std::vector<KNdata> KNdatas;
+
     HCLogInfo("Starting computation of KN datas from " + std::to_string(angle) +
                 "° to " + std::to_string(m_maxAngle) + "° steps " + std::to_string(m_deltaAngle)+"°");
     
@@ -209,44 +261,90 @@ void HCLoader::computeKNdatas()
                 double My = res.TCB / tan(angle * M_PI / 180) + res.VCB;
                 newData.KNsin = My * sin (angle * M_PI / 180);
                 newData.isValid = true;
-                m_KNdatas.push_back(newData);
+                KNdatas.push_back(newData);
             }
             wl += m_deltaWl;
         } // Loop throuh waterlevel
-        angle += m_deltaAngle;
+        if (angle == ANGLE0)
+            angle = m_deltaAngle;
+        else
+            angle += m_deltaAngle;
     } // Loop through angle
+
+    //  ====== Reorganise the datas
+    for(auto& d: KNdatas){
+        m_KNdatas[d.angle].push_back(d);
+    }
 
 }
 
-/*
-HCPoint HCLoader::getEvenCoBFromVolume(double Volume)
+
+std::pair<double,double> HCLoader::getWlandVol(double displ) const
 {
-    if (Volume<m_hydroTable[0].Volume){
+    if (displ < m_KNdatas.at(ANGLE0)[0].Displacement){
         // interpolation to 0
-        double b = Volume  / m_hydroTable[0].Volume;
-        return HCPoint( b * m_hydroTable[0].TCB,  b * m_hydroTable[0].VCB);
+        double b = displ  / m_KNdatas.at(ANGLE0)[0].Displacement;
+        return std::make_pair( b * m_KNdatas.at(ANGLE0)[0].Waterline, 
+                             b * m_KNdatas.at(ANGLE0)[0].Volume);
     }
 
-    for (auto it = std::begin(m_hydroTable); it != std::end(m_hydroTable); ++it){
+    for (auto it = std::begin(m_KNdatas.at(ANGLE0)); it != std::end(m_KNdatas.at(ANGLE0)); ++it){
         auto next = std::next(it);
-        if (next != std::end(m_hydroTable)){
-            if (((*it).Volume < Volume ) && (Volume <= (*next).Volume )){
-                double div = ((*next).Volume - (*it).Volume);
+        if (next != std::end(m_KNdatas.at(ANGLE0))){
+            if (((*it).Displacement < displ ) && (displ <= (*next).Displacement )){
+                double div = ((*next).Displacement - (*it).Displacement);
                 if(div == 0.0){
-                    HCLogError("Error, 2 waterline gave the same volume");
-                    return HCPoint(0,-1); // y = -1 impossible
+                    HCLogError("Error, 2 waterline gave the same Displacement");
+                    return std::make_pair(-1.0,-1.0); // y = -1 impossible
                 }
 
-                double a = ((*next).Volume - Volume) / div;
-                double b = (Volume -  (*it).Volume) / div;
-                return HCPoint( a * (*it).TCB + b * (*next).TCB, a * (*it).VCB + b * (*next).VCB);
+                double a = ((*next).Displacement - displ) / div;
+                double b = (displ -  (*it).Displacement) / div;
+                return std::make_pair( a * (*it).Waterline + b * (*next).Waterline, 
+                                        a * (*it).Volume + b * (*next).Volume);
             }
         }
     }
 
-    return HCPoint(0,-1); // y = -1 impossible
+    return std::make_pair(-1.0,-1.0); // y = -1 impossible
 }
-*/
+
+double HCLoader::getKNsin(double angle, double displ) const
+{
+    const auto& vect = m_KNdatas.at(angle);
+
+    // Angle value don't exists
+    if (vect.empty())
+        return std::numeric_limits<double>::min();
+    
+    if (displ < vect[0].Displacement){
+        // interpolation to 0
+        double b = displ  / vect[0].Displacement;
+        return  b * vect[0].KNsin;
+    }
+
+    // Interpolation
+    for (auto it = std::begin(vect); it != std::end(vect); ++it){
+        auto next = std::next(it);
+        if (next != std::end(vect)){
+            if (((*it).Displacement < displ ) && (displ <= (*next).Displacement )){
+                double div = ((*next).Displacement - (*it).Displacement);
+                if(div == 0.0){
+                    HCLogError("Error, 2 waterline gave the same Displacement");
+                    return std::numeric_limits<double>::min();
+                }
+
+                double a = ((*next).Displacement - displ) / div;
+                double b = (displ -  (*it).Displacement) / div;
+                return (a * (*it).KNsin + b * (*next).KNsin);
+            }
+        }
+    }
+
+    // Not found
+    return std::numeric_limits<double>::min();
+}
+
 
 Hydrodata HCLoader::computeHydroFromWaterline(const std::pair<HCPoint,HCPoint>& waterline )
 {

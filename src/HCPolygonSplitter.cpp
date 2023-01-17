@@ -111,18 +111,8 @@ HCPolygons& HCPolygonSplitter::getPolygonFromSide(LineSide side)
 
     // Check if each poly is on the right side
     for (auto& p : m_collected){
-        size_t i = 0;
-        bool finished = false;
-        while ((i < p.vertices.size())&&(!finished)){
-            LineSide s = p.side;
-            if (s != LineSide::On){
-                finished = true;
-                if (s == side)
-                    m_polys.getPolygons().push_back(HCPolygon(p.vertices));
-            }
-            else
-                ++i;
-        }
+        if(p.side == side)
+            m_polys.getPolygons().push_back(HCPolygon(p.vertices));
     }
     
     return m_polys;

@@ -121,28 +121,55 @@ namespace HydroCpp
         Hydrodata computeHydroFromWaterline(const std::pair<HCPoint,HCPoint>& waterline );
         
         /**
-         * @brief retrieve the COG in section from a volume in hydrotable
+         * @brief retrieve Waterline and Volume from linear interpolation
+         * in the KN datas stored
+         * @param Displ displacement to be considered
+         * @return a pair first is Waterline, second is Volume
          */
-        //HCPoint getEvenCoBFromVolume(double Volume);
+        std::pair<double,double> getWlandVol(double displ) const;
 
         /**
-         * @brief write Hydrotable on the corresponding shhet
+         * @brief retrieve KNsin from linear interpolation
+         * in the KN datas stored
+         * @param angle angle be considered
+         * @param Displ displacement to be considered
+         * @return the interpolated KNsin value or 
+         * std::numeric_limits<double>::min() if not available
+         */
+        double getKNsin(double angle, double displ) const;
+
+        /**
+         * @brief write Hydrotable on the corresponding sheet
          * @param wksHydro the worksheet to write on 
          */
-        void writeHydroTable(OpenXLSX::XLWorksheet& wksHydro) const;
+        void writeHydroTable(OpenXLSX::XLWorksheet& wks) const;
 
+         /**
+         * @brief write KN on the corresponding sheet
+         * @param wksHydro the worksheet to write on 
+         * @return the number of written lines
+         */
+        uint32_t writeKNTable(OpenXLSX::XLWorksheet& wks) const;
+        
         /**
          * @brief 
          * @note order is : waterline,volume, displacement, immersion, MCT, 
          *                  LCB, TCB, LCF, KMT, waterplane,RMT, RML, VCB, Lpp
          */
-        const std::vector<OpenXLSX::XLCellValue> getHydroRow(size_t index) const;
 
     private:
         std::string                 m_filename;
+
+         /**
+         * @brief key:x, value: pointer HCpolygon of cross section
+         */
         std::map<double,HCPolygon*>  m_hull;
         std::vector<Hydrodata>      m_hydroTable;
-        std::vector<KNdata>         m_KNdatas;
+
+        /**
+         * @brief key:angle, value: vector of KN data
+         */
+        std::map<double,std::vector<KNdata>>     m_KNdatas; 
         MinMax                      m_minMax {
                     std::numeric_limits<double>::max(), //xmin
                     std::numeric_limits<double>::min(), //xmax
@@ -153,6 +180,8 @@ namespace HydroCpp
         double                      m_deltaWl;
         double                      m_maxAngle;
         double                      m_deltaAngle;
+        double                      m_maxDispl;
+        double                      m_deltaDispl;
         double                      m_d_sw;
 
 
