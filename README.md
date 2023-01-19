@@ -70,7 +70,7 @@ The minimum required info in the xlsx file to be able to run HydroCpp is:
  * a table named `tbl_Hullform`, containting at least 3 columns named x,y, z
 
 The system of coordinates of the hull is:
- - x along the length of the ship, from aft to fore, x=0 at the aft perpendicular (no negative values)
+ - x, along the length of the ship, from aft to fore, x=0 at the aft perpendicular (no negative values)
  - y, transverse to the ship, from portside to starboard y=0 at the centerline of the ship
  - z, perpendicular of the xy plane, z positive upward, z=0 at keel (no negative value)
 
