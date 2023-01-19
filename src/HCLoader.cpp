@@ -91,7 +91,7 @@ void HCLoader::writeToWorkbook()
     tblHydro.autofilter().hideArrows();
 
     // Write KN table
-     if(wb.sheetExists(KN_SHEET_NAME))
+    if(wb.sheetExists(KN_SHEET_NAME))
         wb.deleteSheet(KN_SHEET_NAME);
     
     auto wksKN = wb.addWorksheet(KN_SHEET_NAME);
@@ -102,6 +102,12 @@ void HCLoader::writeToWorkbook()
     auto tblKN = wb.addTable(KN_SHEET_NAME, KN_TBL_NAME, ref );
     tblKN.tableStyle().setStyle("TableStyleMedium2");
     tblKN.autofilter().hideArrows();
+
+    // Write Notes
+    if(wb.sheetExists(NOTES_SHEET_NAME))
+        wb.deleteSheet(NOTES_SHEET_NAME);
+    auto wksNotes = wb.addWorksheet(NOTES_SHEET_NAME);
+    writeNotes(wksNotes);
 
     // Save and close
     doc.save();
@@ -207,6 +213,28 @@ uint32_t HCLoader::writeKNTable(XLWorksheet& wks) const
     return i;
 }
 
+
+void HCLoader::writeNotes(OpenXLSX::XLWorksheet& wks) const
+{
+    std::vector<XLCellValue> rowValues;
+    uint32_t i = 1;
+
+    for(auto const& r: notes){
+        rowValues.clear();
+        for (const std::string& c : r){
+            if (c == "%L")
+                rowValues.emplace_back(m_hydroTable[0].Lpp);
+            else if (c == "%D")
+                rowValues.emplace_back(m_d_sw);
+            else    
+                rowValues.emplace_back(c);
+        }
+
+        auto row = wks.row(i);
+        row.values() = rowValues;
+        ++i;
+    }
+}
 
 void HCLoader::computeHydroTable()
 {

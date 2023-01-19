@@ -140,22 +140,24 @@ namespace HydroCpp
 
         /**
          * @brief write Hydrotable on the corresponding sheet
-         * @param wksHydro the worksheet to write on 
+         * @param wks the worksheet to write on 
          */
         void writeHydroTable(OpenXLSX::XLWorksheet& wks) const;
 
          /**
          * @brief write KN on the corresponding sheet
-         * @param wksHydro the worksheet to write on 
+         * @param wks the worksheet to write on 
          * @return the number of written lines
          */
         uint32_t writeKNTable(OpenXLSX::XLWorksheet& wks) const;
         
         /**
-         * @brief 
-         * @note order is : waterline,volume, displacement, immersion, MCT, 
-         *                  LCB, TCB, LCF, KMT, waterplane,RMT, RML, VCB, Lpp
+         * @brief write notes in the dedicated worksheet
+         * @param wks the worksheet to write on 
+         * @note the const std::string const std::string notes[][]
+         * shall be available in the namespace HydroCpp
          */
+        void writeNotes(OpenXLSX::XLWorksheet& wks) const;
 
     private:
         std::string                 m_filename;
