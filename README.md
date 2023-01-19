@@ -40,7 +40,12 @@ To reduce as few as possible the dependencies, I decided to remove any user inte
 HydroCpp uses CMake as the build system (or build system generator, to be exact). Therefore, you must install CMake first, in order to build HydroCpp. You can find installation instructions on www.cmake.org.
 
 The libraries are located in the HydroCpp subdirectory to this repo, and 
-are managed as git submodules.
+are managed as git submodules. To install them, simply type in the root path of the project:
+
+```
+$ git submodule add https://github.com/akira215/OpenXLSX.git OpenXLSX
+$ git submodule add https://github.com/akira215/nativefiledialog-extended.git nfd
+```
 
 ## Current Status
 
