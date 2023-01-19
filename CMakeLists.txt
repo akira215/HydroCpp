@@ -27,7 +27,7 @@ file(GLOB CPP_SRC CONFIGURE_DEPENDS "src/*.cpp")
 # executable
 #======================================================================
 add_executable(${PROJECT_NAME} ${CPP_SRC})
-target_link_libraries(${PROJECT_NAME} OpenXLSX::OpenXLSX nfd)
+target_link_libraries(${PROJECT_NAME} OpenXLSX::OpenXLSX nfd -static-libgcc -static-libstdc++)
 
 target_include_directories(OpenXLSX
             PUBLIC

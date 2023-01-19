@@ -67,5 +67,7 @@ namespace HydroCpp
         {"Data", "Unit", "Comment"},
         {"Lpp", "%L","m"},
         {"ρsw", "%D","t/m3 sea water density"},
+        {"----------","",""},
+        {"Repo:","https://github.com/akira215/HydroCpp",""},
     };
 }
