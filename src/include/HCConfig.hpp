@@ -5,6 +5,7 @@
   Author: Akira Shimahara
 */
 #pragma once
+
 #include <string>
 
 #define HULL_TBL_NAME       "tbl_Hullform"
