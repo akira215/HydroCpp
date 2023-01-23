@@ -237,6 +237,7 @@ bool HCPolygon::isCounterclockwise() const
         else if (m_vertices.at(i).x < xc) {
             xc = m_vertices.at(i).x;
             shortList.clear();
+            shortList.push_back(i);
             index = i;
         }
     } 

@@ -71,7 +71,7 @@ The minimum required info in the xlsx file to be able to run HydroCpp is:
 
 The system of coordinates of the hull is:
  - x, along the length of the ship, from aft to fore, x=0 at the aft perpendicular (no negative values)
- - y, transverse to the ship, from portside to starboard y=0 at the centerline of the ship
+ - y, transverse to the ship, from centerline to portside y=0 at the centerline of the ship
  - z, perpendicular of the xy plane, z positive upward, z=0 at keel (no negative value)
 
 Note that each section will be applied to length corresponding a x(n+1)-x(n),

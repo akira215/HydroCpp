@@ -243,14 +243,18 @@ void HCLoader::computeHydroTable()
     HCLogInfo("Starting computation of hydrotable from " + std::to_string(wl) +
                 " to " + std::to_string(m_maxWl) + " steps " + std::to_string(m_deltaWl));
     
+    bool finished = false;
 
-    while (wl <= m_maxWl) {
+    while ((wl <= m_maxWl)&&(!finished)) {
         // waterline form left to right
         auto waterline = std::make_pair(HCPoint(m_minMax.xmin-1, wl),
                                         HCPoint(m_minMax.xmax+1, wl));
         Hydrodata newItem = computeHydroFromWaterline(waterline);
-        if (newItem.isValid)
-            m_hydroTable.push_back(newItem);
+        if (newItem.submerged)
+            finished = true;
+        else
+            if (newItem.isValid)
+                m_hydroTable.push_back(newItem);
         wl += m_deltaWl;
     }
     
@@ -265,7 +269,7 @@ void HCLoader::computeKNdatas()
                 "° to " + std::to_string(m_maxAngle) + "° steps " + std::to_string(m_deltaAngle)+"°");
     
     while(angle <= m_maxAngle){
-        double wl = m_deltaWl;
+        double wl = m_deltaWl; // Use for debug only
         bool finished = false;
         double tanPhi = tan(angle * M_PI/180);
         HCPoint startPt = HCPoint(m_minMax.xmin - 1, -(m_minMax.xmax - m_minMax.xmin + 1) * tanPhi);
@@ -281,7 +285,7 @@ void HCLoader::computeKNdatas()
                 finished = true;
             } else {
                 KNdata newData;
-                //HCPoint evenCoB = getEvenCoBFromVolume(res.Volume);// deal with res
+                
                 newData.angle = angle;
                 newData.Volume = res.Volume;
                 newData.Displacement = res.Displacement;
