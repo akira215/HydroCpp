@@ -128,8 +128,11 @@ Also the soft compute for each waterline step KN datas, until completely submerg
 
 ## Changes
 
-### New in version 0.0.0
-
+### Version 0.1.0
+First available version
+### New in version 0.1.1
+- Correcting a bug in HCPolygon isCounterclockwise()
+- Limiting Hydrotable computation to submerged level
 
 ## Credits
 
