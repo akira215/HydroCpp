@@ -394,7 +394,7 @@ Hydrodata HCLoader::computeHydroFromWaterline(const std::pair<HCPoint,HCPoint>& 
         // the length of the last element will be the same as the n-1 one
         auto next = std::next(it);
         if (next != m_hull.end())
-            elmtLength = abs(next->first - it->first);
+            elmtLength = std::abs(next->first - it->first);
 
         HCPolygonSplitter split(it->second, waterline);
         auto wetSection = split.getPolygonFromSide(LineSide::Right);
