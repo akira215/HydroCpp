@@ -46,6 +46,10 @@ are managed as git submodules. To install them, simply type in the root path of 
 $ git submodule add https://github.com/akira215/OpenXLSX.git OpenXLSX
 $ git submodule add https://github.com/akira215/nativefiledialog-extended.git nfd
 ```
+Or, to clone the repo including the submodules, simply type:
+```
+git clone --recurse-submodules -j8 https://github.com/akira215/HydroCpp.git
+```
 
 ## Current Status
 
