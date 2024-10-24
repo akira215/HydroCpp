@@ -28,7 +28,7 @@ using namespace HydroCpp;
 
 int main() {
     HCLogInfo("HydroCpp (c) Akira Corp." );
-    HCLogInfo(std::string("Workbook shall contain the hull hydro data in a table named \"") + HYDRO_TBL_NAME +"\"" );
+    HCLogInfo(std::string("Workbook shall contain the hull hydro data in a table named \"") + HULL_TBL_NAME +"\"" );
     HCLogInfo("All data shall be x: longitudinal forward y: transveral starboard z: vertical upward" );
     HCLogInfo("x=0: aft perpendicular y=0: centerline z=0: keel" );
     HCLogInfo("==========" );
