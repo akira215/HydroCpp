@@ -1,0 +1,4 @@
+// the configured options and settings to pass to source
+#define HydroCpp_VERSION_MAJOR @HydroCpp_VERSION_MAJOR@
+#define HydroCpp_VERSION_MINOR @HydroCpp_VERSION_MINOR@
+#define HydroCpp_VERSION_PATCH @HydroCpp_VERSION_PATCH@

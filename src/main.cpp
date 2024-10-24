@@ -22,18 +22,23 @@
 #include "HCConfig.hpp"
 #include "HCLoader.hpp"
 
+// ===== Config Includes ===== //
+#include "HydroCppConfig.h"
+
+
 using namespace std;
 using namespace OpenXLSX;
 using namespace HydroCpp;
 
 int main() {
-    HCLogInfo("HydroCpp (c) Akira Corp." );
+    HCLogInfo("HydroCpp (c) v" + to_string(HydroCpp_VERSION_MAJOR) + "." 
+                + to_string(HydroCpp_VERSION_MINOR) + "."
+                + to_string(HydroCpp_VERSION_PATCH) + " Akira Corp." );
     HCLogInfo(std::string("Workbook shall contain the hull hydro data in a table named \"") + HULL_TBL_NAME +"\"" );
     HCLogInfo("All data shall be x: longitudinal forward y: transveral starboard z: vertical upward" );
     HCLogInfo("x=0: aft perpendicular y=0: centerline z=0: keel" );
     HCLogInfo("==========" );
     HCLogInfo("Additional named range could be provided: max_wl, Δwl, φMax, Δφ, ρsw" );
-    
     
     // initialize NFD
     NFD::Guard nfdGuard;

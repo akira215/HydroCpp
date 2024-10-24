@@ -34,6 +34,11 @@ set(THREADS_PREFER_PTHREAD_FLAG ON)
 find_package(Threads REQUIRED)
 
 #======================================================================
+# Configure config header
+#======================================================================
+configure_file(src/include/HydroCppConfig.h.in HydroCppConfig.h)
+
+#======================================================================
 # executable
 #======================================================================
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -static")
@@ -42,10 +47,11 @@ add_executable(${PROJECT_NAME} ${CPP_SRC})
 target_link_libraries(${PROJECT_NAME} OpenXLSX::OpenXLSX nfd -static-libgcc -static-libstdc++ Threads::Threads)
 #target_link_libraries (${PROJECT_NAME} OpenXLSX::OpenXLSX nfd -static gcc stdc++ winpthread -dynamic)
 
-target_include_directories(OpenXLSX
+target_include_directories(${PROJECT_NAME}
             PUBLIC
             $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}>
-            $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/src/include>)     
+            $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/src/include>
+            ${PROJECT_BINARY_DIR})     
 
 #======================================================================
 # Creating installer (require NSIS)
